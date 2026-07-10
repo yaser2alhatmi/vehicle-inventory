@@ -135,3 +135,7 @@ src/components/   shared UI bits
 | POST | /api/trips/:id/return | return a trip (restocks, closes) |
 
 Errors come back as `{ "error": "message" }` with status 400.
+
+---
+
+© 2026 Yasser-ALhatmi. All rights reserved.

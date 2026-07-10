@@ -4,8 +4,6 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { Field, inputCls, btnPrimary } from "@/components/ui";
 
-const DEMO = { email: "yaser@store.local", password: "Yaser@6070Oman" };
-
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -91,30 +89,10 @@ export default function LoginPage() {
           <button type="submit" disabled={loading} className={btnPrimary + " mt-6 w-full justify-center"}>
             {loading ? "Signing in…" : "Sign in"}
           </button>
-
-          <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3.5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0 text-xs leading-relaxed text-slate-500">
-                <p className="font-semibold text-slate-600">Reviewer demo account</p>
-                <p className="mt-0.5 truncate font-mono">{DEMO.email}</p>
-                <p className="truncate font-mono">{DEMO.password}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail(DEMO.email);
-                  setPassword(DEMO.password);
-                }}
-                className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-100"
-              >
-                Autofill
-              </button>
-            </div>
-          </div>
         </form>
 
         <p className="mt-6 text-center text-xs text-slate-500">
-          Store ⇄ vehicle reconciliation · taken · returned · used
+          © {new Date().getFullYear()} Yasser-ALhatmi · All rights reserved
         </p>
       </div>
     </div>

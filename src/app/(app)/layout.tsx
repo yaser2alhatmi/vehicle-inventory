@@ -38,9 +38,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="mt-auto space-y-3 px-4 pb-4">
           <UserMenu />
           <p className="px-1 text-[11px] leading-relaxed text-slate-500">
-            Store ⇄ vehicle reconciliation
+            © {new Date().getFullYear()} Yasser-ALhatmi
             <br />
-            taken · returned · used
+            All rights reserved
           </p>
         </div>
       </aside>
