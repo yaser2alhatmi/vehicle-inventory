@@ -17,6 +17,7 @@ export default function StockPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
   const load = useCallback(
     () =>
@@ -85,6 +86,10 @@ export default function StockPage() {
   }
 
   const lowStock = (items ?? []).filter((i) => i.min_qty > 0 && i.qty_on_hand <= i.min_qty);
+  const q = search.trim().toLowerCase();
+  const visible = (items ?? []).filter(
+    (i) => !q || i.name.toLowerCase().includes(q) || i.barcode.toLowerCase().includes(q),
+  );
 
   return (
     <div>
@@ -138,10 +143,26 @@ export default function StockPage() {
         </form>
       </Card>
 
+      {items !== null && items.length > 0 && (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <input
+            className={inputCls + " max-w-xs"}
+            placeholder="Search by name or barcode…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <span className="whitespace-nowrap text-xs text-slate-400">
+            {visible.length} of {items.length} items
+          </span>
+        </div>
+      )}
+
       {items === null ? (
         <Spinner />
       ) : items.length === 0 ? (
         <EmptyState title="No items yet" hint="Add your first stock item above." />
+      ) : visible.length === 0 ? (
+        <EmptyState title="No items match your search" hint="Try a different name or barcode." />
       ) : (
         <div className={tableWrapCls}>
           <table className="w-full text-sm">
@@ -155,7 +176,7 @@ export default function StockPage() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => {
+              {visible.map((item) => {
                 const low = item.min_qty > 0 && item.qty_on_hand <= item.min_qty;
                 return (
                   <tr key={item.id} className={rowCls}>
