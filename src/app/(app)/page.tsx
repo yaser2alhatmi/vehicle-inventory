@@ -183,14 +183,14 @@ export default function StockPage() {
                     <td className="px-4 py-2.5">
                       <Barcode code={item.barcode} />
                     </td>
-                    <td className="px-4 py-2.5 font-medium text-slate-800">{item.name}</td>
-                    <td className="px-4 py-2.5 text-slate-500">{item.unit}</td>
+                    <td className="px-4 py-2.5 font-medium text-slate-800 dark:text-slate-100">{item.name}</td>
+                    <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{item.unit}</td>
                     <td className="px-4 py-2.5 text-right tabular-nums">
-                      <span className={low ? "font-semibold text-amber-600" : "text-slate-800"}>
+                      <span className={low ? "font-semibold text-amber-600 dark:text-amber-400" : "font-medium text-slate-700 dark:text-slate-200"}>
                         {item.qty_on_hand}
                       </span>
                       {low && (
-                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
                           LOW
                         </span>
                       )}

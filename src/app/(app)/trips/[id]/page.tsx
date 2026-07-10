@@ -121,10 +121,10 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
                 <tr key={ti.id} className={rowCls}>
                   <td className="px-4 py-2.5">
                     <Barcode code={ti.item?.barcode} />
-                    <span className="ml-2 font-medium text-slate-800">{ti.item?.name}</span>
+                    <span className="ml-2 font-medium text-slate-800 dark:text-slate-100">{ti.item?.name}</span>
                     <span className="ml-1.5 text-xs text-slate-400">({ti.item?.unit})</span>
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-slate-800">
+                  <td className="px-4 py-2.5 text-right tabular-nums text-slate-800 dark:text-slate-100">
                     {ti.qty_taken}
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums">
@@ -139,14 +139,14 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
                         onChange={(e) => setReturnQty({ ...returnQty, [ti.id]: e.target.value })}
                       />
                     ) : (
-                      <span className="text-slate-800">{ti.qty_returned}</span>
+                      <span className="text-slate-800 dark:text-slate-100">{ti.qty_returned}</span>
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums">
                     {used === null ? (
                       <span className="text-slate-300">—</span>
                     ) : (
-                      <span className={"font-semibold " + (used > 0 ? "text-blue-700" : "text-slate-400")}>
+                      <span className={"font-semibold " + (used > 0 ? "text-emerald-700 dark:text-emerald-400" : "text-slate-400")}>
                         {used}
                       </span>
                     )}
@@ -157,11 +157,11 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
           </tbody>
           {!isOut && (
             <tfoot>
-              <tr className="border-t border-slate-200 bg-slate-50 font-semibold text-slate-700">
+              <tr className="border-t border-slate-200 bg-slate-50 font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200">
                 <td className="px-4 py-2.5 text-xs uppercase tracking-wide">Totals</td>
                 <td className="px-4 py-2.5 text-right tabular-nums">{totals.taken}</td>
                 <td className="px-4 py-2.5 text-right tabular-nums">{totals.returned}</td>
-                <td className="px-4 py-2.5 text-right tabular-nums text-blue-700">{totals.used}</td>
+                <td className="px-4 py-2.5 text-right tabular-nums text-emerald-700 dark:text-emerald-400">{totals.used}</td>
               </tr>
             </tfoot>
           )}

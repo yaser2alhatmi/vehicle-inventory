@@ -177,7 +177,7 @@ export default function NewTripPage() {
                 <tr key={l.item.id} className={rowCls}>
                   <td className="px-4 py-2.5">
                     <Barcode code={l.item.barcode} />
-                    <span className="ml-2 font-medium text-slate-800">{l.item.name}</span>
+                    <span className="ml-2 font-medium text-slate-800 dark:text-slate-100">{l.item.name}</span>
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-slate-500">
                     {l.item.qty_on_hand} {l.item.unit}

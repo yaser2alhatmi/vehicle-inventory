@@ -31,7 +31,7 @@ function TripTable({ trips, showReturned }: { trips: Trip[]; showReturned: boole
           {trips.map((t) => (
             <tr key={t.id} className={rowCls}>
               <td className="px-4 py-2.5">
-                <span className="font-medium text-slate-800">{t.vehicle?.registration}</span>
+                <span className="font-medium text-slate-800 dark:text-slate-100">{t.vehicle?.registration}</span>
                 <span className="ml-2 text-xs text-slate-400">{t.vehicle?.type}</span>
               </td>
               <td className="px-4 py-2.5">
@@ -39,7 +39,7 @@ function TripTable({ trips, showReturned }: { trips: Trip[]; showReturned: boole
               </td>
               <td className="px-4 py-2.5 text-slate-500">{fmt(t.left_at)}</td>
               {showReturned && <td className="px-4 py-2.5 text-slate-500">{fmt(t.returned_at)}</td>}
-              <td className="px-4 py-2.5 text-right tabular-nums text-slate-800">
+              <td className="px-4 py-2.5 text-right tabular-nums text-slate-800 dark:text-slate-100">
                 {t.trip_items?.length ?? 0}
               </td>
               <td className="px-4 py-2.5 text-right">

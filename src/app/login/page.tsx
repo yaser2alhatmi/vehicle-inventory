@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { Field, inputCls, btnPrimary } from "@/components/ui";
+import { ThemeToggle } from "@/components/theme";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -32,12 +33,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-slate-900 px-4 py-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50rem_28rem_at_75%_-10%,rgba(59,130,246,0.16),transparent),radial-gradient(35rem_22rem_at_-5%_110%,rgba(99,102,241,0.1),transparent)]" />
+    <div className="relative flex min-h-screen items-center justify-center bg-emerald-950 px-4 py-10">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50rem_28rem_at_75%_-10%,rgba(16,185,129,0.18),transparent),radial-gradient(35rem_22rem_at_-5%_110%,rgba(20,184,166,0.12),transparent)]" />
+
+      <div className="absolute right-4 top-4">
+        <ThemeToggle onDark />
+      </div>
 
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-900/40">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 shadow-xl shadow-emerald-900/40">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7">
               <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
               <path d="M15 18H9" />
@@ -54,10 +59,10 @@ export default function LoginPage() {
 
         <form
           onSubmit={signIn}
-          className="rounded-2xl border border-white/10 bg-white p-6 shadow-2xl shadow-slate-950/50"
+          className="rounded-2xl border border-white/10 bg-white p-6 shadow-2xl shadow-slate-950/50 dark:bg-slate-800 dark:border-slate-700"
         >
           {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
               {error}
             </div>
           )}

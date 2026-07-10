@@ -63,29 +63,57 @@ export default function NavLinks({ orientation }: { orientation: "side" | "top" 
   const pathname = usePathname();
 
   return (
-    <nav className={orientation === "side" ? "flex flex-col gap-1" : "flex gap-1"}>
+    <nav className={orientation === "side" ? "flex flex-col gap-0.5" : "flex gap-1"}>
       {LINKS.map((link) => {
         const active =
           link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-        const base =
-          orientation === "side"
-            ? "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors "
-            : "flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ";
-        const colors =
-          orientation === "side"
-            ? active
-              ? "bg-white/10 text-white shadow-inner"
-              : "text-slate-400 hover:bg-white/5 hover:text-slate-100"
-            : active
-              ? "bg-blue-50 text-blue-700"
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900";
+
+        if (orientation === "side") {
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={active ? "page" : undefined}
+              className={
+                "group relative flex items-center gap-3 rounded-lg py-2.5 pl-4 pr-3 text-sm transition-all " +
+                (active
+                  ? "bg-emerald-400/20 font-semibold text-white"
+                  : "font-medium text-emerald-50/80 hover:bg-white/10 hover:text-white")
+              }
+            >
+              {/* left accent bar for the active item (best-practice indicator) */}
+              <span
+                className={
+                  "absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-emerald-300 transition-opacity " +
+                  (active ? "opacity-100" : "opacity-0")
+                }
+              />
+              <Icon
+                name={link.icon}
+                className={
+                  "h-[18px] w-[18px] shrink-0 transition-colors " +
+                  (active ? "text-emerald-200" : "text-emerald-100/60 group-hover:text-white")
+                }
+              />
+              {link.label}
+            </Link>
+          );
+        }
+
         return (
-          <Link key={link.href} href={link.href} className={base + colors}>
+          <Link
+            key={link.href}
+            href={link.href}
+            aria-current={active ? "page" : undefined}
+            className={
+              "flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors " +
+              (active
+                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800")
+            }
+          >
             <Icon name={link.icon} className="h-[18px] w-[18px] shrink-0" />
             {link.label}
-            {orientation === "side" && active && (
-              <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400" />
-            )}
           </Link>
         );
       })}
