@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 const KNOWN_CODES = [
   "TRIP_EMPTY",
   "VEHICLE_BUSY",
+  "VEHICLE_NOT_FOUND",
   "QTY_INVALID",
   "ITEM_NOT_FOUND",
   "INSUFFICIENT_STOCK",

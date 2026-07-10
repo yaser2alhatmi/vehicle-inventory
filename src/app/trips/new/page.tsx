@@ -132,6 +132,7 @@ export default function NewTripPage() {
             placeholder="e.g. CBL-001"
             value={barcode}
             onChange={(e) => setBarcode(e.target.value)}
+            list="barcodes"
             autoFocus
           />
           <button type="submit" className={btnPrimary}>

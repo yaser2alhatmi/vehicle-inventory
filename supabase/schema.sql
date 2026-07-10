@@ -65,6 +65,13 @@ begin
     raise exception 'TRIP_EMPTY: a trip needs at least one item';
   end if;
 
+  -- lock the vehicle row so two concurrent trips for the same vehicle
+  -- serialize here instead of both passing the busy-check below
+  perform 1 from vehicles where id = p_vehicle_id for update;
+  if not found then
+    raise exception 'VEHICLE_NOT_FOUND: vehicle % does not exist', p_vehicle_id;
+  end if;
+
   if exists (select 1 from trips where vehicle_id = p_vehicle_id and status = 'out') then
     raise exception 'VEHICLE_BUSY: this vehicle already has a trip out';
   end if;
