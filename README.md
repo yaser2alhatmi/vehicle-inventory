@@ -6,7 +6,10 @@ items (each identified by a barcode/SKU), goes out on a job, and returns with
 whatever they didn't use. The app keeps stock accurate and reconciles every
 trip: taken / returned / used.
 
-Stack: Next.js (App Router) + TypeScript + Supabase (Postgres).
+Stack: Next.js (App Router) + TypeScript + Supabase (Postgres + Auth).
+
+Live demo: https://yaser-vehicle-inventory.netlify.app
+Sign in with the demo account: `yaser@store.local` / `Yaser@6070Oman`
 
 ## Running it locally
 
@@ -21,7 +24,11 @@ You need Node 20+ and a free Supabase project.
    If the editor warns about Row Level Security, choose "Run without RLS" —
    see the note at the bottom about why.
 
-2. Configure the environment:
+2. Create a sign-in user. The app is behind a login, so in the Supabase
+   dashboard go to Authentication → Users → Add user, enter any email and
+   password, and check "Auto Confirm User".
+
+3. Configure the environment:
 
    ```
    cp .env.example .env.local
@@ -30,14 +37,14 @@ You need Node 20+ and a free Supabase project.
    Fill in both values from your Supabase project (Settings → API Keys):
    the project URL and the publishable (anon) key.
 
-3. Install and run:
+4. Install and run:
 
    ```
    npm install
    npm run dev
    ```
 
-   Open http://localhost:3000.
+   Open http://localhost:3000 and sign in with the user you created.
 
 ## What's in it
 
@@ -62,6 +69,10 @@ returned twice, and items that appear in trip history can't be deleted
 
 Extras I added on top of the core:
 
+- Authentication: the whole app sits behind a Supabase Auth login. A server
+  gate (Next.js proxy) redirects signed-out visitors to /login and answers
+  API calls with 401, so protection isn't just hidden links — the API itself
+  is closed.
 - Barcode quick-add: on the trip screen you type or paste a barcode and hit
   Enter; scanning the same code again bumps the quantity. USB barcode
   scanners behave exactly like a keyboard that types the code and presses
@@ -69,6 +80,7 @@ Extras I added on top of the core:
   required.
 - Low-stock alerts: each item can have a minimum level; the stock page shows
   a warning banner and marks the items that are at or below it.
+- Stock search: instant filter by name or barcode.
 
 ## Design decisions
 
@@ -95,8 +107,10 @@ Other choices worth mentioning:
   complicate the model without adding much to the core idea.
 
 About RLS: it's off because the database is only ever reached from the
-server — the key never ships to the browser. In a production multi-tenant
-setup I'd enable RLS and write policies per role instead.
+server — the data key never ships to the browser, and the server gate
+already requires a signed-in user for every page and API call. In a
+production multi-tenant setup I'd enable RLS and write policies per role
+on top of that.
 
 ## Project layout
 
