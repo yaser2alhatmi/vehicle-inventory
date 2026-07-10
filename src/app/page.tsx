@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import type { Item } from "@/lib/types";
-import { ErrorBanner, EmptyState, Spinner, inputCls, btnPrimary, btnSecondary, btnDanger } from "@/components/ui";
+import {
+  PageHeader, Card, Field, Barcode, ErrorBanner, EmptyState, Spinner,
+  inputCls, btnPrimary, btnSecondary, btnGhost, btnDanger,
+  tableWrapCls, theadCls, rowCls,
+} from "@/components/ui";
 
 const EMPTY_FORM = { barcode: "", name: "", unit: "", qty_on_hand: "0", min_qty: "0" };
 
@@ -14,16 +18,16 @@ export default function StockPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      setItems(await api<Item[]>("/api/items"));
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  }, []);
+  const load = useCallback(
+    () =>
+      api<Item[]>("/api/items")
+        .then(setItems)
+        .catch((err) => setError((err as Error).message)),
+    [],
+  );
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   function startEdit(item: Item) {
@@ -35,6 +39,7 @@ export default function StockPage() {
       qty_on_hand: String(item.qty_on_hand),
       min_qty: String(item.min_qty),
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function cancelEdit() {
@@ -83,54 +88,65 @@ export default function StockPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold">Stock</h1>
+      <PageHeader title="Stock" subtitle="Current inventory levels in the store" />
       <ErrorBanner message={error} onDismiss={() => setError("")} />
 
       {lowStock.length > 0 && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          ⚠️ Low stock: {lowStock.map((i) => `${i.name} (${i.qty_on_hand} ${i.unit})`).join(" · ")}
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <span aria-hidden>⚠️</span>
+          <span>
+            <span className="font-semibold">Low stock:</span>{" "}
+            {lowStock.map((i) => `${i.name} (${i.qty_on_hand} ${i.unit})`).join(" · ")}
+          </span>
         </div>
       )}
 
-      <form onSubmit={save} className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
-        <p className="mb-3 text-sm font-medium text-slate-700">
-          {editingId ? "Edit item" : "Add item"}
-        </p>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-          <input className={inputCls} placeholder="Barcode / SKU" value={form.barcode}
-            onChange={(e) => setForm({ ...form, barcode: e.target.value })} required />
-          <input className={inputCls} placeholder="Name" value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <input className={inputCls} placeholder="Unit (piece, meter…)" value={form.unit}
-            onChange={(e) => setForm({ ...form, unit: e.target.value })} required />
-          <input className={inputCls} type="number" min="0" step="any" placeholder="Qty on hand"
-            value={form.qty_on_hand}
-            onChange={(e) => setForm({ ...form, qty_on_hand: e.target.value })} required />
-          <input className={inputCls} type="number" min="0" step="any" placeholder="Low-stock alert at"
-            value={form.min_qty}
-            onChange={(e) => setForm({ ...form, min_qty: e.target.value })} />
-        </div>
-        <div className="mt-3 flex gap-2">
-          <button type="submit" disabled={saving} className={btnPrimary}>
-            {saving ? "Saving…" : editingId ? "Save changes" : "Add item"}
-          </button>
-          {editingId && (
-            <button type="button" onClick={cancelEdit} className={btnSecondary}>
-              Cancel
+      <Card title={editingId ? "Edit item" : "Add item"} className="mb-6">
+        <form onSubmit={save}>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+            <Field label="Barcode / SKU">
+              <input className={inputCls + " font-mono"} placeholder="CBL-001" value={form.barcode}
+                onChange={(e) => setForm({ ...form, barcode: e.target.value })} required />
+            </Field>
+            <Field label="Name">
+              <input className={inputCls} placeholder="Coaxial cable" value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            </Field>
+            <Field label="Unit">
+              <input className={inputCls} placeholder="meter, piece…" value={form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value })} required />
+            </Field>
+            <Field label="Qty on hand">
+              <input className={inputCls} type="number" min="0" step="any" value={form.qty_on_hand}
+                onChange={(e) => setForm({ ...form, qty_on_hand: e.target.value })} required />
+            </Field>
+            <Field label="Low-stock alert at">
+              <input className={inputCls} type="number" min="0" step="any" value={form.min_qty}
+                onChange={(e) => setForm({ ...form, min_qty: e.target.value })} />
+            </Field>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <button type="submit" disabled={saving} className={btnPrimary}>
+              {saving ? "Saving…" : editingId ? "Save changes" : "+ Add item"}
             </button>
-          )}
-        </div>
-      </form>
+            {editingId && (
+              <button type="button" onClick={cancelEdit} className={btnSecondary}>
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </Card>
 
       {items === null ? (
         <Spinner />
       ) : items.length === 0 ? (
         <EmptyState title="No items yet" hint="Add your first stock item above." />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        <div className={tableWrapCls}>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr className={theadCls}>
                 <th className="px-4 py-3">Barcode</th>
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3">Unit</th>
@@ -142,21 +158,27 @@ export default function StockPage() {
               {items.map((item) => {
                 const low = item.min_qty > 0 && item.qty_on_hand <= item.min_qty;
                 return (
-                  <tr key={item.id} className="border-b border-slate-100 last:border-0">
-                    <td className="px-4 py-2 font-mono text-xs">{item.barcode}</td>
-                    <td className="px-4 py-2">{item.name}</td>
-                    <td className="px-4 py-2 text-slate-500">{item.unit}</td>
-                    <td className="px-4 py-2 text-right">
-                      <span className={low ? "font-semibold text-amber-600" : ""}>
-                        {item.qty_on_hand}
-                        {low && " ⚠️"}
-                      </span>
+                  <tr key={item.id} className={rowCls}>
+                    <td className="px-4 py-2.5">
+                      <Barcode code={item.barcode} />
                     </td>
-                    <td className="px-4 py-2 text-right">
-                      <button onClick={() => startEdit(item)} className="mr-1 rounded-md px-2 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50">
+                    <td className="px-4 py-2.5 font-medium text-slate-800">{item.name}</td>
+                    <td className="px-4 py-2.5 text-slate-500">{item.unit}</td>
+                    <td className="px-4 py-2.5 text-right tabular-nums">
+                      <span className={low ? "font-semibold text-amber-600" : "text-slate-800"}>
+                        {item.qty_on_hand}
+                      </span>
+                      {low && (
+                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                          LOW
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2.5 text-right whitespace-nowrap">
+                      <button onClick={() => startEdit(item)} className={btnGhost}>
                         Edit
                       </button>
-                      <button onClick={() => remove(item)} className={btnDanger}>
+                      <button onClick={() => remove(item)} className={btnDanger + " ml-1"}>
                         Delete
                       </button>
                     </td>

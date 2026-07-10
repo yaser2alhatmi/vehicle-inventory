@@ -19,7 +19,12 @@ const KNOWN_CODES = [
 ] as const;
 
 export function errorResponse(err: unknown): NextResponse {
-  const message = err instanceof Error ? err.message : String(err);
+  // Supabase returns PostgrestError objects that may not be Error instances,
+  // so read .message structurally instead of relying on instanceof.
+  const message =
+    typeof err === "object" && err !== null && "message" in err
+      ? String((err as { message: unknown }).message)
+      : String(err);
 
   for (const code of KNOWN_CODES) {
     if (message.includes(code)) {

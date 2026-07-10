@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
 import type { Item, Vehicle, Trip } from "@/lib/types";
-import { ErrorBanner, Spinner, inputCls, btnPrimary, btnDanger } from "@/components/ui";
+import {
+  PageHeader, Card, Field, Barcode, ErrorBanner, Spinner,
+  inputCls, btnPrimary, btnDanger, tableWrapCls, theadCls, rowCls,
+} from "@/components/ui";
 
 interface Line {
   item: Item;
@@ -106,54 +109,63 @@ export default function NewTripPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold">Start a trip</h1>
+      <PageHeader
+        title="Start a trip"
+        subtitle="Load a vehicle with items — stock is deducted when the trip starts"
+      />
       <ErrorBanner message={error} onDismiss={() => setError("")} />
 
-      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4">
-        <label className="mb-1 block text-sm font-medium text-slate-700">Vehicle</label>
-        <select className={inputCls} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
-          <option value="">— pick a vehicle —</option>
-          {vehicles.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.registration} ({v.type})
-            </option>
-          ))}
-        </select>
-      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card title="1 · Vehicle">
+          <Field label="Which vehicle is going out?">
+            <select className={inputCls} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
+              <option value="">— pick a vehicle —</option>
+              {vehicles.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.registration} ({v.type})
+                </option>
+              ))}
+            </select>
+          </Field>
+        </Card>
 
-      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4">
-        <label className="mb-1 block text-sm font-medium text-slate-700">
-          Add item by barcode <span className="font-normal text-slate-400">(type or scan, then Enter)</span>
-        </label>
-        <form onSubmit={addByBarcode} className="flex gap-2">
-          <input
-            ref={barcodeRef}
-            className={inputCls + " font-mono"}
-            placeholder="e.g. CBL-001"
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            list="barcodes"
-            autoFocus
-          />
-          <button type="submit" className={btnPrimary}>
-            Add
-          </button>
-        </form>
-        <datalist id="barcodes">
-          {items.map((i) => (
-            <option key={i.id} value={i.barcode}>{i.name}</option>
-          ))}
-        </datalist>
-        <p className="mt-2 text-xs text-slate-400">
-          Available: {items.filter((i) => i.qty_on_hand > 0).map((i) => i.barcode).join(" · ") || "nothing in stock"}
-        </p>
+        <Card title="2 · Add items by barcode">
+          <form onSubmit={addByBarcode} className="flex items-end gap-2">
+            <div className="flex-1">
+              <Field label="Type or scan, then press Enter">
+                <input
+                  ref={barcodeRef}
+                  className={inputCls + " font-mono"}
+                  placeholder="e.g. CBL-001"
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  list="barcodes"
+                  autoFocus
+                />
+              </Field>
+            </div>
+            <button type="submit" className={btnPrimary}>
+              Add
+            </button>
+          </form>
+          <datalist id="barcodes">
+            {items.map((i) => (
+              <option key={i.id} value={i.barcode}>{i.name}</option>
+            ))}
+          </datalist>
+          <p className="mt-2.5 text-xs leading-relaxed text-slate-400">
+            Available:{" "}
+            {items.filter((i) => i.qty_on_hand > 0).map((i) => i.barcode).join(" · ") ||
+              "nothing in stock"}
+          </p>
+        </Card>
       </div>
 
       {lines.length > 0 && (
-        <div className="mb-4 overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        <div className={tableWrapCls + " mt-4"}>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr className={theadCls}>
                 <th className="px-4 py-3">Item</th>
                 <th className="px-4 py-3 text-right">In stock</th>
                 <th className="px-4 py-3 text-right">Qty to take</th>
@@ -162,26 +174,26 @@ export default function NewTripPage() {
             </thead>
             <tbody>
               {lines.map((l) => (
-                <tr key={l.item.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2">
-                    <span className="font-mono text-xs text-slate-400">{l.item.barcode}</span>{" "}
-                    {l.item.name}
+                <tr key={l.item.id} className={rowCls}>
+                  <td className="px-4 py-2.5">
+                    <Barcode code={l.item.barcode} />
+                    <span className="ml-2 font-medium text-slate-800">{l.item.name}</span>
                   </td>
-                  <td className="px-4 py-2 text-right text-slate-500">
+                  <td className="px-4 py-2.5 text-right tabular-nums text-slate-500">
                     {l.item.qty_on_hand} {l.item.unit}
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-2.5 text-right">
                     <input
                       type="number"
                       min="0.01"
                       step="any"
                       max={l.item.qty_on_hand}
-                      className="w-24 rounded-md border border-slate-300 px-2 py-1 text-right text-sm"
+                      className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-right text-sm tabular-nums transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                       value={l.qty}
                       onChange={(e) => setQty(l.item.id, Number(e.target.value))}
                     />
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-2.5 text-right">
                     <button
                       onClick={() => setLines((prev) => prev.filter((x) => x.item.id !== l.item.id))}
                       className={btnDanger}
@@ -196,9 +208,16 @@ export default function NewTripPage() {
         </div>
       )}
 
-      <button onClick={startTrip} disabled={saving} className={btnPrimary}>
-        {saving ? "Starting…" : "Start trip (deducts stock)"}
-      </button>
+      <div className="mt-5">
+        <button onClick={startTrip} disabled={saving} className={btnPrimary}>
+          {saving ? "Starting…" : "🚚 Start trip"}
+        </button>
+        {lines.length > 0 && (
+          <span className="ml-3 text-xs text-slate-400">
+            {lines.length} item{lines.length > 1 ? "s" : ""} · stock is deducted immediately
+          </span>
+        )}
+      </div>
     </div>
   );
 }

@@ -4,7 +4,10 @@ import { use, useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import type { Trip } from "@/lib/types";
 import { qtyUsed } from "@/lib/types";
-import { ErrorBanner, Spinner, btnPrimary } from "@/components/ui";
+import {
+  PageHeader, Barcode, ErrorBanner, Spinner, StatusBadge,
+  btnPrimary, tableWrapCls, theadCls, rowCls,
+} from "@/components/ui";
 
 export default function TripDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -13,21 +16,22 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
   const [returnQty, setReturnQty] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      const t = await api<Trip>(`/api/trips/${id}`);
-      setTrip(t);
-      // default: everything unused comes back (crew returns what they didn't use)
-      setReturnQty(
-        Object.fromEntries((t.trip_items ?? []).map((ti) => [ti.id, String(ti.qty_taken)])),
-      );
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  }, [id]);
+  const load = useCallback(
+    () =>
+      api<Trip>(`/api/trips/${id}`)
+        .then((t) => {
+          setTrip(t);
+          // default: everything unused comes back (crew returns what they didn't use)
+          setReturnQty(
+            Object.fromEntries((t.trip_items ?? []).map((ti) => [ti.id, String(ti.qty_taken)])),
+          );
+        })
+        .catch((err) => setError((err as Error).message)),
+    [id],
+  );
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   async function returnTrip() {
@@ -75,34 +79,35 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   const isOut = trip.status === "out";
+  const totals = (trip.trip_items ?? []).reduce(
+    (acc, ti) => {
+      acc.taken += ti.qty_taken;
+      if (ti.qty_returned !== null) {
+        acc.returned += ti.qty_returned;
+        acc.used += ti.qty_taken - ti.qty_returned;
+      }
+      return acc;
+    },
+    { taken: 0, returned: 0, used: 0 },
+  );
 
   return (
     <div>
-      <div className="mb-4 flex items-center gap-3">
-        <h1 className="text-xl font-semibold">
-          Trip — {trip.vehicle?.registration}
-        </h1>
-        <span
-          className={
-            "rounded-full px-3 py-0.5 text-xs font-semibold " +
-            (isOut ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700")
-          }
-        >
-          {isOut ? "OUT" : "RETURNED"}
-        </span>
-      </div>
-
-      <p className="mb-4 text-sm text-slate-500">
-        Left: {new Date(trip.left_at).toLocaleString()}
-        {trip.returned_at && <> · Returned: {new Date(trip.returned_at).toLocaleString()}</>}
-      </p>
+      <PageHeader
+        title={`Trip — ${trip.vehicle?.registration ?? ""}`}
+        subtitle={
+          `Left ${new Date(trip.left_at).toLocaleString()}` +
+          (trip.returned_at ? ` · Returned ${new Date(trip.returned_at).toLocaleString()}` : "")
+        }
+        action={<StatusBadge status={trip.status} />}
+      />
 
       <ErrorBanner message={error} onDismiss={() => setError("")} />
 
-      <div className="mb-4 overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <div className={tableWrapCls}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr className={theadCls}>
               <th className="px-4 py-3">Item</th>
               <th className="px-4 py-3 text-right">Taken</th>
               <th className="px-4 py-3 text-right">Returned</th>
@@ -113,42 +118,65 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
             {(trip.trip_items ?? []).map((ti) => {
               const used = qtyUsed(ti);
               return (
-                <tr key={ti.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2">
-                    <span className="font-mono text-xs text-slate-400">{ti.item?.barcode}</span>{" "}
-                    {ti.item?.name}
-                    <span className="ml-1 text-xs text-slate-400">({ti.item?.unit})</span>
+                <tr key={ti.id} className={rowCls}>
+                  <td className="px-4 py-2.5">
+                    <Barcode code={ti.item?.barcode} />
+                    <span className="ml-2 font-medium text-slate-800">{ti.item?.name}</span>
+                    <span className="ml-1.5 text-xs text-slate-400">({ti.item?.unit})</span>
                   </td>
-                  <td className="px-4 py-2 text-right">{ti.qty_taken}</td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-2.5 text-right tabular-nums text-slate-800">
+                    {ti.qty_taken}
+                  </td>
+                  <td className="px-4 py-2.5 text-right tabular-nums">
                     {isOut ? (
                       <input
                         type="number"
                         min="0"
                         step="any"
                         max={ti.qty_taken}
-                        className="w-24 rounded-md border border-slate-300 px-2 py-1 text-right text-sm"
+                        className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-right text-sm tabular-nums transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                         value={returnQty[ti.id] ?? ""}
                         onChange={(e) => setReturnQty({ ...returnQty, [ti.id]: e.target.value })}
                       />
                     ) : (
-                      ti.qty_returned
+                      <span className="text-slate-800">{ti.qty_returned}</span>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-right font-medium">
-                    {used === null ? "—" : used}
+                  <td className="px-4 py-2.5 text-right tabular-nums">
+                    {used === null ? (
+                      <span className="text-slate-300">—</span>
+                    ) : (
+                      <span className={"font-semibold " + (used > 0 ? "text-blue-700" : "text-slate-400")}>
+                        {used}
+                      </span>
+                    )}
                   </td>
                 </tr>
               );
             })}
           </tbody>
+          {!isOut && (
+            <tfoot>
+              <tr className="border-t border-slate-200 bg-slate-50 font-semibold text-slate-700">
+                <td className="px-4 py-2.5 text-xs uppercase tracking-wide">Totals</td>
+                <td className="px-4 py-2.5 text-right tabular-nums">{totals.taken}</td>
+                <td className="px-4 py-2.5 text-right tabular-nums">{totals.returned}</td>
+                <td className="px-4 py-2.5 text-right tabular-nums text-blue-700">{totals.used}</td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
 
       {isOut && (
-        <button onClick={returnTrip} disabled={saving} className={btnPrimary}>
-          {saving ? "Returning…" : "Return trip (restocks returned quantities)"}
-        </button>
+        <div className="mt-5">
+          <button onClick={returnTrip} disabled={saving} className={btnPrimary}>
+            {saving ? "Returning…" : "↩ Return trip"}
+          </button>
+          <span className="ml-3 text-xs text-slate-400">
+            Returned quantities go back into stock · used = taken − returned
+          </span>
+        </div>
       )}
     </div>
   );

@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import type { Vehicle } from "@/lib/types";
-import { ErrorBanner, EmptyState, Spinner, inputCls, btnPrimary, btnSecondary } from "@/components/ui";
+import {
+  PageHeader, Card, Field, ErrorBanner, EmptyState, Spinner,
+  inputCls, btnPrimary, btnSecondary, btnGhost,
+  tableWrapCls, theadCls, rowCls,
+} from "@/components/ui";
 
 const EMPTY_FORM = { registration: "", type: "" };
 
@@ -14,16 +18,16 @@ export default function VehiclesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      setVehicles(await api<Vehicle[]>("/api/vehicles"));
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  }, []);
+  const load = useCallback(
+    () =>
+      api<Vehicle[]>("/api/vehicles")
+        .then(setVehicles)
+        .catch((err) => setError((err as Error).message)),
+    [],
+  );
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   async function save(e: React.FormEvent) {
@@ -48,47 +52,50 @@ export default function VehiclesPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold">Vehicles</h1>
+      <PageHeader title="Vehicles" subtitle="The fleet that carries stock out to jobs" />
       <ErrorBanner message={error} onDismiss={() => setError("")} />
 
-      <form onSubmit={save} className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
-        <p className="mb-3 text-sm font-medium text-slate-700">
-          {editingId ? "Edit vehicle" : "Add vehicle"}
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          <input className={inputCls} placeholder="Registration / name" value={form.registration}
-            onChange={(e) => setForm({ ...form, registration: e.target.value })} required />
-          <input className={inputCls} placeholder="Type (van, truck…)" value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value })} required />
-        </div>
-        <div className="mt-3 flex gap-2">
-          <button type="submit" disabled={saving} className={btnPrimary}>
-            {saving ? "Saving…" : editingId ? "Save changes" : "Add vehicle"}
-          </button>
-          {editingId && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditingId(null);
-                setForm(EMPTY_FORM);
-              }}
-              className={btnSecondary}
-            >
-              Cancel
+      <Card title={editingId ? "Edit vehicle" : "Add vehicle"} className="mb-6">
+        <form onSubmit={save}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Registration / name">
+              <input className={inputCls} placeholder="VAN-1042" value={form.registration}
+                onChange={(e) => setForm({ ...form, registration: e.target.value })} required />
+            </Field>
+            <Field label="Type">
+              <input className={inputCls} placeholder="Service van, truck…" value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value })} required />
+            </Field>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <button type="submit" disabled={saving} className={btnPrimary}>
+              {saving ? "Saving…" : editingId ? "Save changes" : "+ Add vehicle"}
             </button>
-          )}
-        </div>
-      </form>
+            {editingId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setForm(EMPTY_FORM);
+                }}
+                className={btnSecondary}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </Card>
 
       {vehicles === null ? (
         <Spinner />
       ) : vehicles.length === 0 ? (
         <EmptyState title="No vehicles yet" hint="Add your first vehicle above." />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        <div className={tableWrapCls}>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr className={theadCls}>
                 <th className="px-4 py-3">Registration</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3" />
@@ -96,16 +103,17 @@ export default function VehiclesPage() {
             </thead>
             <tbody>
               {vehicles.map((v) => (
-                <tr key={v.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 font-medium">{v.registration}</td>
-                  <td className="px-4 py-2 text-slate-500">{v.type}</td>
-                  <td className="px-4 py-2 text-right">
+                <tr key={v.id} className={rowCls}>
+                  <td className="px-4 py-2.5 font-medium text-slate-800">{v.registration}</td>
+                  <td className="px-4 py-2.5 text-slate-500">{v.type}</td>
+                  <td className="px-4 py-2.5 text-right">
                     <button
                       onClick={() => {
                         setEditingId(v.id);
                         setForm({ registration: v.registration, type: v.type });
+                        window.scrollTo({ top: 0, behavior: "smooth" });
                       }}
-                      className="rounded-md px-2 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                      className={btnGhost}
                     >
                       Edit
                     </button>
