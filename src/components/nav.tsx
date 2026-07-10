@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-function Icon({ name, className }: { name: "stock" | "vehicles" | "trips"; className?: string }) {
+function Icon({ name, className }: { name: "dashboard" | "stock" | "vehicles" | "trips"; className?: string }) {
   const common = {
     className,
     fill: "none",
@@ -13,6 +13,16 @@ function Icon({ name, className }: { name: "stock" | "vehicles" | "trips"; class
     strokeLinejoin: "round" as const,
     viewBox: "0 0 24 24",
   };
+  if (name === "dashboard") {
+    return (
+      <svg {...common}>
+        <rect x="3" y="3" width="7" height="9" rx="1" />
+        <rect x="14" y="3" width="7" height="5" rx="1" />
+        <rect x="14" y="12" width="7" height="9" rx="1" />
+        <rect x="3" y="16" width="7" height="5" rx="1" />
+      </svg>
+    );
+  }
   if (name === "stock") {
     return (
       <svg {...common}>
@@ -43,6 +53,7 @@ function Icon({ name, className }: { name: "stock" | "vehicles" | "trips"; class
 }
 
 const LINKS = [
+  { href: "/dashboard", label: "Dashboard", icon: "dashboard" as const },
   { href: "/", label: "Stock", icon: "stock" as const },
   { href: "/vehicles", label: "Vehicles", icon: "vehicles" as const },
   { href: "/trips", label: "Trips", icon: "trips" as const },
