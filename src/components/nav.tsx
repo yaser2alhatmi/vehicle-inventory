@@ -63,7 +63,7 @@ export default function NavLinks({ orientation }: { orientation: "side" | "top" 
   const pathname = usePathname();
 
   return (
-    <nav className={orientation === "side" ? "flex flex-col gap-0.5" : "flex gap-1"}>
+    <nav className={orientation === "side" ? "flex flex-col gap-0.5" : "flex gap-1 pt-2"}>
       {LINKS.map((link) => {
         const active =
           link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
@@ -106,7 +106,7 @@ export default function NavLinks({ orientation }: { orientation: "side" | "top" 
             href={link.href}
             aria-current={active ? "page" : undefined}
             className={
-              "flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors " +
+              "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors " +
               (active
                 ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800")

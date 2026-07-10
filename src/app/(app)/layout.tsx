@@ -56,14 +56,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Mobile top bar */}
+      {/* Mobile top bar: brand row + its own nav row so tabs never crowd */}
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95 md:hidden">
         <div className="flex items-center justify-between gap-4 px-4 py-3">
           <Brand onDark={false} />
-          <div className="flex items-center gap-1">
-            <ThemeToggle />
-            <NavLinks orientation="top" />
-          </div>
+          <ThemeToggle />
+        </div>
+        <div className="overflow-x-auto border-t border-slate-100 px-2 pb-2 dark:border-slate-800">
+          <NavLinks orientation="top" />
         </div>
       </header>
 
