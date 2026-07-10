@@ -89,9 +89,10 @@ export default function LoginPage() {
           <button type="submit" disabled={loading} className={btnPrimary + " mt-5 w-full justify-center"}>
             {loading ? "Signing in…" : "Sign in"}
           </button>
-          <p className="mt-4 text-center text-xs text-slate-400">
-            Demo account: see the README
-          </p>
+          <div className="mt-4 rounded-lg bg-slate-50 px-3 py-2.5 text-center text-xs text-slate-500">
+            Demo account — email <span className="font-mono text-slate-700">yaser@store.local</span>{" "}
+            · password <span className="font-mono text-slate-700">Yaser@6070Oman</span>
+          </div>
         </form>
       </div>
     </div>
