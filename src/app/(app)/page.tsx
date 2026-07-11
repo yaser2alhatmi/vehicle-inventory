@@ -11,6 +11,9 @@ import {
 
 const EMPTY_FORM = { barcode: "", name: "", unit: "", qty_on_hand: "0", min_qty: "0" };
 
+// common stock units — a dropdown keeps them consistent instead of free typing
+const UNITS = ["piece", "meter", "roll", "box", "pack", "liter", "kg", "set"];
+
 export default function StockPage() {
   const [items, setItems] = useState<Item[] | null>(null);
   const [error, setError] = useState("");
@@ -118,8 +121,13 @@ export default function StockPage() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </Field>
             <Field label="Unit">
-              <input className={inputCls} placeholder="meter, piece…" value={form.unit}
-                onChange={(e) => setForm({ ...form, unit: e.target.value })} required />
+              <select className={inputCls} value={form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value })} required>
+                <option value="">— choose —</option>
+                {(form.unit && !UNITS.includes(form.unit) ? [form.unit, ...UNITS] : UNITS).map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
             </Field>
             <Field label="Qty on hand">
               <input className={inputCls} type="number" min="0" step="any" value={form.qty_on_hand}

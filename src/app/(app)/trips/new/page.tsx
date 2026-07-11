@@ -51,6 +51,14 @@ export default function NewTripPage() {
       return;
     }
 
+    addItem(item);
+    setBarcode("");
+    barcodeRef.current?.focus();
+  }
+
+  /** Add an item to the trip (or bump its qty if already added). */
+  function addItem(item: Item) {
+    setError("");
     setLines((prev) => {
       const existing = prev.find((l) => l.item.id === item.id);
       if (existing) {
@@ -58,8 +66,6 @@ export default function NewTripPage() {
       }
       return [...prev, { item, qty: 1 }];
     });
-    setBarcode("");
-    barcodeRef.current?.focus();
   }
 
   function setQty(itemId: string, qty: number) {
@@ -129,10 +135,10 @@ export default function NewTripPage() {
           </Field>
         </Card>
 
-        <Card title="2 · Add items by barcode">
+        <Card title="2 · Add items">
           <form onSubmit={addByBarcode} className="flex items-end gap-2">
             <div className="flex-1">
-              <Field label="Type or scan, then press Enter">
+              <Field label="Scan or type a barcode, then Enter">
                 <input
                   ref={barcodeRef}
                   className={inputCls + " font-mono"}
@@ -153,11 +159,29 @@ export default function NewTripPage() {
               <option key={i.id} value={i.barcode}>{i.name}</option>
             ))}
           </datalist>
-          <p className="mt-2.5 text-xs leading-relaxed text-slate-400">
-            Available:{" "}
-            {items.filter((i) => i.qty_on_hand > 0).map((i) => i.barcode).join(" · ") ||
-              "nothing in stock"}
-          </p>
+
+          {/* Or pick from a list — easier on mobile or when you don't know the code */}
+          <div className="mt-3">
+            <Field label="Or pick from the list">
+              <select
+                className={inputCls}
+                value=""
+                onChange={(e) => {
+                  const item = items.find((i) => i.id === e.target.value);
+                  if (item) addItem(item);
+                }}
+              >
+                <option value="">— choose an item —</option>
+                {items
+                  .filter((i) => i.qty_on_hand > 0)
+                  .map((i) => (
+                    <option key={i.id} value={i.id}>
+                      {i.name} ({i.barcode}) — {i.qty_on_hand} {i.unit}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+          </div>
         </Card>
       </div>
 
